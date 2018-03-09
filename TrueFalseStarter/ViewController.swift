@@ -12,20 +12,16 @@ import AudioToolbox
 
 class ViewController: UIViewController {
     
-    let questionsPerRound = 4
+    //Initialise Constants and Variables
+    var theQuiz = QuizQuestions()
+    var questionsPerRound = 0
     var questionsAsked = 0
     var correctQuestions = 0
     var indexOfSelectedQuestion: Int = 0
-    
     var gameSound: SystemSoundID = 0
+    var questionDictionary: [String: String] = [:]
     
-    let trivia: [[String : String]] = [
-        ["Question": "Only female koalas can whistle", "Answer": "False"],
-        ["Question": "Blue whales are technically whales", "Answer": "True"],
-        ["Question": "Camels are cannibalistic", "Answer": "False"],
-        ["Question": "All ducks are birds", "Answer": "True"]
-    ]
-    
+    //IBOutlet properties here
     @IBOutlet weak var questionField: UILabel!
     @IBOutlet weak var trueButton: UIButton!
     @IBOutlet weak var falseButton: UIButton!
@@ -34,6 +30,9 @@ class ViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        //Set the questions per round to the amount of questions that have been
+        //Submitted to theQuiz
+        questionsPerRound = theQuiz.questions.count
         loadGameStartSound()
         // Start game
         playGameStartSound()
@@ -46,10 +45,11 @@ class ViewController: UIViewController {
     }
     
     func displayQuestion() {
-        indexOfSelectedQuestion = GKRandomSource.sharedRandom().nextInt(upperBound: trivia.count)
-        let questionDictionary = trivia[indexOfSelectedQuestion]
+
+        questionDictionary = theQuiz.randomQuestion()
         questionField.text = questionDictionary["Question"]
         playAgainButton.isHidden = true
+        
     }
     
     func displayScore() {
@@ -68,7 +68,7 @@ class ViewController: UIViewController {
         // Increment the questions asked counter
         questionsAsked += 1
         
-        let selectedQuestionDict = trivia[indexOfSelectedQuestion]
+        let selectedQuestionDict = questionDictionary
         let correctAnswer = selectedQuestionDict["Answer"]
         
         if (sender === trueButton &&  correctAnswer == "True") || (sender === falseButton && correctAnswer == "False") {

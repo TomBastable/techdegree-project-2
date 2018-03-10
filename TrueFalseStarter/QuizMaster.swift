@@ -14,7 +14,8 @@ struct QuizQuestions {
     
     var questions: [[String : String]] = refillQuestions()
     
-    ///Provides a randomQuestion and also removes the question from the array to avoid duplication
+    ///Provides a randomQuestion and also removes the question from
+    ///the array to avoid duplicated Q's entering the quiz
     mutating func randomQuestion() -> [String: String] {
         
         //Generate a random number using GameKit to ensure that the
@@ -38,14 +39,13 @@ struct QuizQuestions {
     
 }
 
-///Once a game has finished, the questions will need topping up - which is what this function does! This way it's easy to comply with the DRY rule. (Don't Repeat Yourself)
+///Once a game has finished, the questions will need topping up (We remove them to avoid asking one twice)
+///which is what this function does! This way it's easy to comply with the DRY rule.
 func refillQuestions() -> [[String : String]]{
     
-    return [
-        ["Question": "Only female koalas can whistle", "Answer": "False"],
-        ["Question": "Blue whales are technically whales", "Answer": "True"],
-        ["Question": "Camels are cannibalistic", "Answer": "False"],
-        ["Question": "All ducks are birds", "Answer": "True"]
-    ]
+    //Create a temporary array of dictionaries
+    let scopedQuestions = Questions()
+    //return the questions
+    return scopedQuestions.getQuestions
     
 }

@@ -39,17 +39,22 @@ struct QuizQuestions {
     
 }
 
+///Provides a [String] of a questions potential answers for assigning to the UI
 func getAnswerStringsArray(question: [String: String]) -> [String]{
     
+    //Empty array that will add every dictionary item that isn't the question
     var arrayOfAnswers: [String] = []
     
+    //Go through every entry in the question
     for dict in question {
+        //As long as the dictionary item isn't the question, add the value to the array
         if dict.key != "question"{
             arrayOfAnswers.append(dict.value)
         }
 
     }
     
+    //return the array
     return arrayOfAnswers
 }
 

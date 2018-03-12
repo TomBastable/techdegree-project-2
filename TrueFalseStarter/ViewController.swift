@@ -19,7 +19,12 @@ class ViewController: UIViewController {
     var correctQuestions = 0
     var indexOfSelectedQuestion: Int = 0
     var gameSound: SystemSoundID = 0
+    var correctSound: SystemSoundID = 0
+    var incorrectSound: SystemSoundID = 0
     var questionDictionary: Question!
+    var seconds = 15 //This variable will hold a starting value of seconds. It could be any amount above 0.
+    var timer = Timer()
+    var isTimerRunning = false //This will be used to make sure only one timer is created at a time.
     
     //IBOutlet properties here
     @IBOutlet weak var questionField: UILabel!
@@ -29,6 +34,7 @@ class ViewController: UIViewController {
     @IBOutlet weak var buttonFour: UIButton!
     @IBOutlet weak var playAgainButton: UIButton!
     @IBOutlet weak var resultLabel: UILabel!
+    @IBOutlet weak var timerLabel: UILabel!
     
 
     override func viewDidLoad() {
@@ -39,7 +45,7 @@ class ViewController: UIViewController {
         questionsPerRound = theQuiz.questions.count
         loadGameStartSound()
         
-        //UISetup
+        //UISetup - set the disabled state of buttons to the same as enabled
         buttonOne.setTitleColor(UIColor.white, for: .disabled)
         buttonTwo.setTitleColor(UIColor.white, for: .disabled)
         buttonThree.setTitleColor(UIColor.white, for: .disabled)
@@ -52,11 +58,37 @@ class ViewController: UIViewController {
         resultLabel.isHidden = true
     }
     
+    
     //Game functionality goes below here
     //==================================//
     
+    ///Function to start a timer, that has calls another function every second to update the timerLabel to show the user their countdown
+    func runTimer() {
+        timer = Timer.scheduledTimer(timeInterval: 1, target: self,   selector: (#selector(ViewController.updateTimer)), userInfo: nil, repeats: true)
+    }
+    
+    ///Function that updates the seconds variable every second, while also updating the timerLabel every second. Also handles timeout.
+    @objc func updateTimer() {
+        
+        seconds -= 1
+        
+        //If the timer is at 0, the user has ran out of time
+        if seconds == 0 {
+            timer.invalidate()
+            seconds = 15
+            timeRanOut()
+        }
+        else{
+            //if the timer isn't at 0, keep updating the label!
+           timerLabel.text = "\(seconds)"
+        }
+        
+        
+    }
+    
     ///Function to display the question and setup the buttons for the correct amount of answers
     func displayQuestion() {
+        runTimer()
         //Select your random question
         questionDictionary = theQuiz.randomQuestion()
         //Work out how many potential answers your question has
@@ -69,31 +101,50 @@ class ViewController: UIViewController {
     
     ///Function to check if the user selected answer is correct
     @IBAction func checkAnswer(_ sender: UIButton) {
+        //User has interacted with an answer - first thing to do is invalidate the timer and reset the seconds var.
+        //Don't update the label yet so the user can see how long it took them.
+        timer.invalidate()
+        seconds = 15
         // Increment the questions asked counter
         questionsAsked += 1
         
         //Assign the correct answer to a constant
         let correctAnswer = questionDictionary.correctAnswer
         
+        //As per the Mockups, highlight the correct answer
         highlightAnswer(withCorrectAnswer: correctAnswer)
+        
         //Check if selected buttons text is equal to the correct answer
         if (sender.titleLabel?.text == correctAnswer) {
             //Correct answer!
+            
+            //Play the correct sound
+            playCorrectSound()
+            //Add to the users score
             correctQuestions += 1
+            //Update the result Label and unhide it
             resultLabel.text = "Correct!"
             resultLabel.isHidden = false
+            //Update label color
             resultLabel.textColor = UIColor.green
         }
         else{
             //Wrong answer!
-            resultLabel.text = "Incorrect"
+            
+            //Play the incorrect sound
+            playIncorrectSound()
+            //Update result label and unhide it
+            resultLabel.text = "Sorry, that's not it"
             resultLabel.isHidden = false
+            // Update label color
             resultLabel.textColor = UIColor.red
         }
+        //Disable user interaction on the answer buttons to avoid duplicate answers / score
         enableDisableButtons(withBool: false)
         //answer checking is done - time to move on! (This used to be a timed interval - it's now a user input as per mockup
         playAgainButton.isHidden = false
         
+        //Work out what text to put on the playAgainButton title - if we have questions left, move on - otherwise end the game.
         if questionsAsked == questionsPerRound {
             playAgainButton.setTitle("See Your Score", for: .normal)
         }
@@ -102,25 +153,71 @@ class ViewController: UIViewController {
         }
     }
     
+    
+    //Work out if the playAgainButton is wanting one of three things:
     @IBAction func newGameOrNextRound(_ sender: UIButton) {
+        //Hide the result label
         resultLabel.isHidden = true
+        //reset highlighted answers
         resetButtonHighlights()
+        //enable user interactivity on the answer buttons
         enableDisableButtons(withBool: true)
+        
+        //If user is at the end of a game
         if sender.titleLabel?.text == "See Your Score" {
+            //Play the game start / end sound
+            playGameStartSound()
+            //Display the users score and give them the option to restart
             displayScore()
         }
+        //If the user needs a new question
         else if sender.titleLabel?.text == "Next Question" {
+            //reset the timer label
+            timerLabel.text = "\(seconds)"
+            //display the new question
             displayQuestion()
         }
+        // if the user needs a whole new game made up
         else if sender.titleLabel?.text == "Play Again" {
             //Show the answer buttons
             hideButtons(booleanValue: false)
+            //Unhide the timer label and set it to the time limit
+            timerLabel.isHidden = false
+            timerLabel.text = "\(seconds)"
             //Reset all the gameplay ints
             questionsAsked = 0
             correctQuestions = 0
             //New round!
             nextRound()
         }
+    }
+    
+    ///Called when the user has taken the max amount of time for a question
+    func timeRanOut() {
+        //Play the incorrect sound and display the negative result in text too
+        playIncorrectSound()
+        resultLabel.text = "Time ran out!"
+        resultLabel.isHidden = false
+        resultLabel.textColor = UIColor.red
+        
+        //Increase the asked questions int
+        questionsAsked += 1
+        
+        //Disable user interaction on the buttons
+        enableDisableButtons(withBool: false)
+        //Unhide play again button
+        playAgainButton.isHidden = false
+        //Highlight the correct answer
+        highlightAnswer(withCorrectAnswer: questionDictionary.correctAnswer)
+        
+        //Work out if the user is at the end of the game or requires more questions and change the button title to suit
+        if questionsAsked == questionsPerRound {
+            playAgainButton.setTitle("See Your Score", for: .normal)
+        }
+        else{
+            playAgainButton.setTitle("Next Question", for: .normal)
+        }
+        
     }
     
     ///Function to check if it's the end of the game, if not then continue on
@@ -131,19 +228,6 @@ class ViewController: UIViewController {
         } else {
             // Continue game
             displayQuestion()
-        }
-    }
-    
-    // MARK: Helper Methods
-    //Use this as the lightning round code later
-    func loadNextRoundWithDelay(seconds: Int) {
-        // Converts a delay in seconds to nanoseconds as signed 64 bit integer
-        let delay = Int64(NSEC_PER_SEC * UInt64(seconds))
-        // Calculates a time value to execute the method given current time and delay
-        let dispatchTime = DispatchTime.now() + Double(delay) / Double(NSEC_PER_SEC)
-        // Executes the nextRound method at the dispatch time on the main queue
-        DispatchQueue.main.asyncAfter(deadline: dispatchTime) {
-            self.nextRound()
         }
     }
     
@@ -186,8 +270,7 @@ class ViewController: UIViewController {
         }
     }
     
-    ///Highlight or renew buttons
-    
+    ///Highlight the correct answer and dim the others
     func highlightAnswer(withCorrectAnswer answer: String) {
 
         if buttonOne.titleLabel?.text != answer{
@@ -204,6 +287,7 @@ class ViewController: UIViewController {
         }
     }
     
+    ///Reset the alpha of all buttons after they have been highlighted
     func resetButtonHighlights() {
         buttonOne.alpha = 1.0
         buttonTwo.alpha = 1.0
@@ -211,6 +295,7 @@ class ViewController: UIViewController {
         buttonFour.alpha = 1.0
     }
     
+    ///Using the BOOL input you can choose to enable or disable user interactitivty on the answer buttons
     func enableDisableButtons(withBool booleanValue: Bool) {
         buttonOne.isEnabled = booleanValue
         buttonTwo.isEnabled = booleanValue
@@ -220,20 +305,37 @@ class ViewController: UIViewController {
     
     ///Game sound setup
     func loadGameStartSound() {
-        let pathToSoundFile = Bundle.main.path(forResource: "GameSound", ofType: "wav")
-        let soundURL = URL(fileURLWithPath: pathToSoundFile!)
-        AudioServicesCreateSystemSoundID(soundURL as CFURL, &gameSound)
+        let pathToGameSoundFile = Bundle.main.path(forResource: "gameEnd", ofType: "wav")
+        let soundGameURL = URL(fileURLWithPath: pathToGameSoundFile!)
+        AudioServicesCreateSystemSoundID(soundGameURL as CFURL, &gameSound)
+        
+        let pathToCorrectSoundFile = Bundle.main.path(forResource: "correct", ofType: "wav")
+        let correctGameURL = URL(fileURLWithPath: pathToCorrectSoundFile!)
+        AudioServicesCreateSystemSoundID(correctGameURL as CFURL, &correctSound)
+        
+        let pathToIncorrectSoundFile = Bundle.main.path(forResource: "incorrect", ofType: "wav")
+        let soundIncorrectURL = URL(fileURLWithPath: pathToIncorrectSoundFile!)
+        AudioServicesCreateSystemSoundID(soundIncorrectURL as CFURL, &incorrectSound)
     }
     
     ///Function that needs to be called to initialise start sound
     func playGameStartSound() {
         AudioServicesPlaySystemSound(gameSound)
     }
+    ///Function that needs to be called when a user selects an incorrect answer
+    func playIncorrectSound() {
+        AudioServicesPlaySystemSound(incorrectSound)
+    }
+    ///Function that needs to be called when a user selects a correct answer
+    func playCorrectSound() {
+        AudioServicesPlaySystemSound(correctSound)
+    }
     
     ///Displays the score and gives the user the option to start a new game
     func displayScore() {
         // Hide the answer buttons
         hideButtons(booleanValue: true)
+        timerLabel.isHidden = true
         
         // Display play again button
         playAgainButton.isHidden = false

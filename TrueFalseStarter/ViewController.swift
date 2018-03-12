@@ -23,8 +23,10 @@ class ViewController: UIViewController {
     
     //IBOutlet properties here
     @IBOutlet weak var questionField: UILabel!
-    @IBOutlet weak var trueButton: UIButton!
-    @IBOutlet weak var falseButton: UIButton!
+    @IBOutlet weak var buttonOne: UIButton!
+    @IBOutlet weak var buttonTwo: UIButton!
+    @IBOutlet weak var buttonThree: UIButton!
+    @IBOutlet weak var buttonFour: UIButton!
     @IBOutlet weak var playAgainButton: UIButton!
     
 
@@ -44,18 +46,53 @@ class ViewController: UIViewController {
         // Dispose of any resources that can be recreated.
     }
     
+    func setupUIWith(thisQuestion question: [String: String], thatHasThisManyAnswers answers: Int) {
+        print("setting up UI")
+        questionField.text = question["question"]
+        let answersArray = getAnswerStringsArray(question: question)
+        let shuffled = GKRandomSource.sharedRandom().arrayByShufflingObjects(in: answersArray)
+        let shuffledAnswers: [String] = shuffled as! [String]
+        if answers == 3 {
+            
+            buttonOne.setTitle(shuffledAnswers[0], for: .normal)
+            buttonTwo.setTitle(shuffledAnswers[1], for: .normal)
+            buttonThree.setTitle(shuffledAnswers[2], for: .normal)
+            buttonFour.isHidden = true
+            
+        }
+        else if answers == 4{
+            
+            buttonFour.isHidden = false
+            buttonOne.setTitle(shuffledAnswers[0], for: .normal)
+            buttonTwo.setTitle(shuffledAnswers[1], for: .normal)
+            buttonThree.setTitle(shuffledAnswers[2], for: .normal)
+            buttonFour.setTitle(shuffledAnswers[3], for: .normal)
+            
+        }
+        else{
+            print("Error. 'Exceeds' criteria was only to handle 3 & 4 potential answers")
+        }
+    }
+    
     func displayQuestion() {
-
+        
         questionDictionary = theQuiz.randomQuestion()
-        questionField.text = questionDictionary["Question"]
+        let answerCount = howManyAnswers(inTheQuestion: questionDictionary)
+        setupUIWith(thisQuestion: questionDictionary, thatHasThisManyAnswers: answerCount)
         playAgainButton.isHidden = true
         
     }
     
+    func hideButtons(booleanValue: Bool){
+        buttonOne.isHidden = booleanValue
+        buttonTwo.isHidden = booleanValue
+        buttonThree.isHidden = booleanValue
+        buttonFour.isHidden = booleanValue
+    }
+    
     func displayScore() {
         // Hide the answer buttons
-        trueButton.isHidden = true
-        falseButton.isHidden = true
+        hideButtons(booleanValue: true)
         
         // Display play again button
         playAgainButton.isHidden = false
@@ -69,13 +106,17 @@ class ViewController: UIViewController {
         questionsAsked += 1
         
         let selectedQuestionDict = questionDictionary
-        let correctAnswer = selectedQuestionDict["Answer"]
+        let correctAnswer = selectedQuestionDict["correctAnswer"]
         
-        if (sender === trueButton &&  correctAnswer == "True") || (sender === falseButton && correctAnswer == "False") {
+        //Check if button text is equal to the correct answer
+        if (sender.titleLabel?.text == correctAnswer) {
+            //Correct answer!
             correctQuestions += 1
             questionField.text = "Correct!"
-        } else {
-            questionField.text = "Sorry, wrong answer!"
+        }
+        else{
+            //Wrong answer!
+            questionField.text = "Incorrect - the answer was \(String(describing: correctAnswer))"
         }
         
         loadNextRoundWithDelay(seconds: 2)
@@ -93,8 +134,7 @@ class ViewController: UIViewController {
     
     @IBAction func playAgain() {
         // Show the answer buttons
-        trueButton.isHidden = false
-        falseButton.isHidden = false
+        hideButtons(booleanValue: false)
         
         questionsAsked = 0
         correctQuestions = 0

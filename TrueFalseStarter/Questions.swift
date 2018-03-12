@@ -9,83 +9,83 @@
 struct Questions {
     let getQuestions: [[String : String]] = [
         
-        ["Question": "This was the only US President to serve more than two consecutive terms.",
+        ["question": "This was the only US President to serve more than two consecutive terms.",
          
-         "Correct Answer": "Franklin D. Roosevelt",
+         "correctAnswer": "Franklin D. Roosevelt",
          
-         "Wrong Answer": "George Washington", "Wrong Answer": "Woodrow Wilson", "Wrong Answer": "Andrew Jackson"],
+         "wrongAnswer1": "George Washington", "wrongAnswer2": "Woodrow Wilson", "wrongAnswer3": "Andrew Jackson"],
         
         
         
-        ["Question": "Which of the following countries has the most residents?",
+        ["question": "Which of the following countries has the most residents?",
          
-         "Correct Answer": "Nigeria",
+         "correctAnswer": "Nigeria",
          
-         "Wrong Answer": "Russia", "Wrong Answer": "Iran", "Wrong Answer": "Vietnam"],
+         "wrongAnswer1": "Russia", "wrongAnswer2": "Iran", "wrongAnswer3": "Vietnam"],
         
         
         
-        ["Question": "In what year was the United Nations founded?",
+        ["question": "In what year was the United Nations founded?",
          
-         "Correct Answer": "1945",
+         "correctAnswer": "1945",
          
-         "Wrong Answer": "1918", "Wrong Answer": "1919", "Wrong Answer": "1954"],
+         "wrongAnswer1": "1918", "wrongAnswer2": "1919"],
         
         
         
-        ["Question": "The Titanic departed from the United Kingdom, where was it supposed to arrive?",
+        ["question": "The Titanic departed from the United Kingdom, where was it supposed to arrive?",
          
-         "Correct Answer": "New York City",
+         "correctAnswer": "New York City",
          
-         "Wrong Answer": "Paris", "Wrong Answer": "Washington D.C.", "Wrong Answer": "Boston"],
+         "wrongAnswer1": "Paris", "wrongAnswer2": "Washington D.C.", "wrongAnswer3": "Boston"],
         
         
         
-        ["Question": "Which nation produces the most oil?",
+        ["question": "Which nation produces the most oil?",
          
-         "Correct Answer": "Canada",
+         "correctAnswer": "Canada",
          
-         "Wrong Answer": "Brazil", "Wrong Answer": "Iraq", "Wrong Answer": "Iran"],
+         "wrongAnswer1": "Brazil", "wrongAnswer2": "Iraq", "wrongAnswer3": "Iran"],
         
         
         
-        ["Question": "Which country has most recently won consecutive World Cups in Soccer?",
+        ["question": "Which country has most recently won consecutive World Cups in Soccer?",
          
-         "Correct Answer": "Brazil",
+         "correctAnswer": "Brazil",
          
-         "Wrong Answer": "Italy", "Wrong Answer": "Argetina", "Wrong Answer": "Spain"],
+         "wrongAnswer1": "Italy", "wrongAnswer2": "Argetina"],
         
         
         
-        ["Question": "Which of the following rivers is longest?",
+        ["question": "Which of the following rivers is longest?",
          
-         "Correct Answer": "Mississippi",
+         "correctAnswer": "Mississippi",
          
-         "Wrong Answer": "Yangtze", "Wrong Answer": "Congo", "Wrong Answer": "Mekong"],
+         "wrongAnswer1": "Yangtze", "wrongAnswer2": "Congo", "wrongAnswer3": "Mekong"],
         
         
         
-        ["Question": "Which city is the oldest?",
+        ["question": "Which city is the oldest?",
          
-         "Correct Answer": "Mexico City",
+         "correctAnswer": "Mexico City",
          
-         "Wrong Answer": "Cape Town", "Wrong Answer": "San Juan", "Wrong Answer": "Sydney"],
+         "wrongAnswer1": "Cape Town", "wrongAnswer2": "San Juan", "wrongAnswer3": "Sydney"],
         
         
         
-        ["Question": "Which country was the first to allow women to vote in national elections?",
+        ["question": "Which country was the first to allow women to vote in national elections?",
          
-         "Correct Answer": "Poland",
+         "correctAnswer": "Poland",
          
-         "Wrong Answer": "United States", "Wrong Answer": "Sweden", "Wrong Answer": "Senegal"],
+         "wrongAnswer1": "United States", "wrongAnswer2": "Sweden", "wrongAnswer3": "Senegal"],
         
         
         
-        ["Question": "Which of these countries won the most medals in the 2012 Summer Games?",
+        ["question": "Which of these countries won the most medals in the 2012 Summer Games?",
          
-         "Correct Answer": "Great Britian",
+         "correctAnswer": "Great Britian",
          
-         "Wrong Answer": "Japan", "Wrong Answer": "Germany", "Wrong Answer": "France"],
+         "wrongAnswer1": "Japan", "wrongAnswer2": "Germany", "wrongAnswer3": "France"],
 
     ]
 }

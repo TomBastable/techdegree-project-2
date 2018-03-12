@@ -39,6 +39,42 @@ struct QuizQuestions {
     
 }
 
+func getAnswerStringsArray(question: [String: String]) -> [String]{
+    
+    var arrayOfAnswers: [String] = []
+    
+    for dict in question {
+        if dict.key != "question"{
+            arrayOfAnswers.append(dict.value)
+        }
+
+    }
+    
+    return arrayOfAnswers
+}
+
+///This function will tell you how many potential answers are in a specific question
+///deliver a single question, not the whole array.
+func howManyAnswers(inTheQuestion question:[String: String]) -> Int {
+    //Initialise an Int to count the answers
+    var answerCount = 0
+    
+    //For every item in the question, count the answer to the answerCount property unless it's of dict key 'question'
+    for dict in question {
+        if dict.key == "question"{
+            //Dictionary is a question, don't count to the value of answers
+        }
+        else{
+            //Dictionary is an answer, increase answer count
+            answerCount += 1
+        }
+    }
+    
+    //Finished, return the final count
+    return answerCount
+    
+}
+
 ///Once a game has finished, the questions will need topping up (We remove them to avoid asking one twice)
 ///which is what this function does! This way it's easy to comply with the DRY rule.
 func refillQuestions() -> [[String : String]]{

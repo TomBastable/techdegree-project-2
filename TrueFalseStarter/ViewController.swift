@@ -15,16 +15,15 @@ class ViewController: UIViewController {
     //Initialise Constants and Variables
     var theQuiz = QuizQuestions()
     var questionsPerRound = 0
-    var questionsAsked = 0
     var correctQuestions = 0
     var indexOfSelectedQuestion: Int = 0
     var gameSound: SystemSoundID = 0
     var correctSound: SystemSoundID = 0
     var incorrectSound: SystemSoundID = 0
     var questionDictionary: Question!
-    var seconds = 15 //This variable will hold a starting value of seconds. It could be any amount above 0.
+    var seconds = 15 //The max ammt of time per question
     var timer = Timer()
-    var isTimerRunning = false //This will be used to make sure only one timer is created at a time.
+
     
     //IBOutlet properties here
     @IBOutlet weak var questionField: UILabel!
@@ -56,13 +55,14 @@ class ViewController: UIViewController {
         displayQuestion()
         playAgainButton.setTitle("Next Question", for: .normal)
         resultLabel.isHidden = true
+        
     }
     
     
     //Game functionality goes below here
     //==================================//
     
-    ///Function to start a timer, that has calls another function every second to update the timerLabel to show the user their countdown
+    ///Function to start a timer, that calls another function every second to update the timerLabel to show the user their countdown
     func runTimer() {
         timer = Timer.scheduledTimer(timeInterval: 1, target: self,   selector: (#selector(ViewController.updateTimer)), userInfo: nil, repeats: true)
     }
@@ -106,7 +106,7 @@ class ViewController: UIViewController {
         timer.invalidate()
         seconds = 15
         // Increment the questions asked counter
-        questionsAsked += 1
+        theQuiz.addQuestionAsked()
         
         //Assign the correct answer to a constant
         let correctAnswer = questionDictionary.correctAnswer
@@ -121,7 +121,7 @@ class ViewController: UIViewController {
             //Play the correct sound
             playCorrectSound()
             //Add to the users score
-            correctQuestions += 1
+            theQuiz.addCorrectAnswer()
             //Update the result Label and unhide it
             resultLabel.text = "Correct!"
             resultLabel.isHidden = false
@@ -145,7 +145,7 @@ class ViewController: UIViewController {
         playAgainButton.isHidden = false
         
         //Work out what text to put on the playAgainButton title - if we have questions left, move on - otherwise end the game.
-        if questionsAsked == questionsPerRound {
+        if theQuiz.questionsAsked == questionsPerRound {
             playAgainButton.setTitle("See Your Score", for: .normal)
         }
         else{
@@ -185,8 +185,7 @@ class ViewController: UIViewController {
             timerLabel.isHidden = false
             timerLabel.text = "\(seconds)"
             //Reset all the gameplay ints
-            questionsAsked = 0
-            correctQuestions = 0
+            theQuiz.resetScores()
             //New round!
             nextRound()
         }
@@ -201,7 +200,7 @@ class ViewController: UIViewController {
         resultLabel.textColor = UIColor.red
         
         //Increase the asked questions int
-        questionsAsked += 1
+        theQuiz.addQuestionAsked()
         
         //Disable user interaction on the buttons
         enableDisableButtons(withBool: false)
@@ -211,7 +210,7 @@ class ViewController: UIViewController {
         highlightAnswer(withCorrectAnswer: questionDictionary.correctAnswer)
         
         //Work out if the user is at the end of the game or requires more questions and change the button title to suit
-        if questionsAsked == questionsPerRound {
+        if theQuiz.questionsAsked == questionsPerRound {
             playAgainButton.setTitle("See Your Score", for: .normal)
         }
         else{
@@ -222,7 +221,7 @@ class ViewController: UIViewController {
     
     ///Function to check if it's the end of the game, if not then continue on
     func nextRound() {
-        if questionsAsked == questionsPerRound {
+        if theQuiz.questionsAsked == questionsPerRound {
             // Game is over
             displayScore()
         } else {
@@ -342,7 +341,7 @@ class ViewController: UIViewController {
         playAgainButton.setTitle("Play Again", for: .normal)
         
         //Show the user their score
-        questionField.text = "Way to go!\nYou got \(correctQuestions) out of \(questionsPerRound) correct!"
+        questionField.text = "Way to go!\nYou got \(theQuiz.correctAnswers) out of \(questionsPerRound) correct!"
         
     }
     

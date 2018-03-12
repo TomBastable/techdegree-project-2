@@ -10,11 +10,19 @@ import GameKit
 
 ///The questions constant holds all questions, randomQuestion function delivers a random
 ///Questions and removes that question temporarily from the array
-
-
 struct QuizQuestions {
     
     var questions: [Question] = refillQuestions()
+    var questionsAsked: Int = 0
+    var correctAnswers: Int = 0
+    
+    mutating func addQuestionAsked(){
+        questionsAsked += 1
+    }
+    
+    mutating func addCorrectAnswer(){
+        correctAnswers += 1
+    }
     
     ///Provides a randomQuestion and also removes the question from
     ///the array to avoid duplicated Q's entering the quiz
@@ -37,6 +45,11 @@ struct QuizQuestions {
         //Return the randomQuestion that has also been removed from the array
         return question
         
+    }
+    
+    mutating func resetScores() {
+        self.questionsAsked = 0
+        self.correctAnswers = 0
     }
     
 }

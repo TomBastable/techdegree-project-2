@@ -19,7 +19,7 @@ class ViewController: UIViewController {
     var correctQuestions = 0
     var indexOfSelectedQuestion: Int = 0
     var gameSound: SystemSoundID = 0
-    var questionDictionary: [String: String] = [:]
+    var questionDictionary: Question!
     
     //IBOutlet properties here
     @IBOutlet weak var questionField: UILabel!
@@ -28,17 +28,28 @@ class ViewController: UIViewController {
     @IBOutlet weak var buttonThree: UIButton!
     @IBOutlet weak var buttonFour: UIButton!
     @IBOutlet weak var playAgainButton: UIButton!
+    @IBOutlet weak var resultLabel: UILabel!
     
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        
         //Set the questions per round to the amount of questions that have been
         //Submitted to theQuiz (Previous version had magic numbers)
         questionsPerRound = theQuiz.questions.count
         loadGameStartSound()
+        
+        //UISetup
+        buttonOne.setTitleColor(UIColor.white, for: .disabled)
+        buttonTwo.setTitleColor(UIColor.white, for: .disabled)
+        buttonThree.setTitleColor(UIColor.white, for: .disabled)
+        buttonFour.setTitleColor(UIColor.white, for: .disabled)
+        
         // Start game
         playGameStartSound()
         displayQuestion()
+        playAgainButton.setTitle("Next Question", for: .normal)
+        resultLabel.isHidden = true
     }
     
     //Game functionality goes below here
@@ -54,7 +65,6 @@ class ViewController: UIViewController {
         setupUIWith(thisQuestion: questionDictionary, thatHasThisManyAnswers: answerCount)
         //Ensure the play again button is hidden
         playAgainButton.isHidden = true
-        
     }
     
     ///Function to check if the user selected answer is correct
@@ -63,21 +73,54 @@ class ViewController: UIViewController {
         questionsAsked += 1
         
         //Assign the correct answer to a constant
-        let correctAnswer = questionDictionary["correctAnswer"]
+        let correctAnswer = questionDictionary.correctAnswer
         
+        highlightAnswer(withCorrectAnswer: correctAnswer)
         //Check if selected buttons text is equal to the correct answer
         if (sender.titleLabel?.text == correctAnswer) {
             //Correct answer!
             correctQuestions += 1
-            questionField.text = "Correct!"
+            resultLabel.text = "Correct!"
+            resultLabel.isHidden = false
+            resultLabel.textColor = UIColor.green
         }
         else{
             //Wrong answer!
-            questionField.text = "Incorrect - the answer was \(String(describing: correctAnswer))"
+            resultLabel.text = "Incorrect"
+            resultLabel.isHidden = false
+            resultLabel.textColor = UIColor.red
         }
+        enableDisableButtons(withBool: false)
+        //answer checking is done - time to move on! (This used to be a timed interval - it's now a user input as per mockup
+        playAgainButton.isHidden = false
         
-        //answer checking is done - time to move on!
-        loadNextRoundWithDelay(seconds: 2)
+        if questionsAsked == questionsPerRound {
+            playAgainButton.setTitle("See Your Score", for: .normal)
+        }
+        else{
+            playAgainButton.setTitle("Next Question", for: .normal)
+        }
+    }
+    
+    @IBAction func newGameOrNextRound(_ sender: UIButton) {
+        resultLabel.isHidden = true
+        resetButtonHighlights()
+        enableDisableButtons(withBool: true)
+        if sender.titleLabel?.text == "See Your Score" {
+            displayScore()
+        }
+        else if sender.titleLabel?.text == "Next Question" {
+            displayQuestion()
+        }
+        else if sender.titleLabel?.text == "Play Again" {
+            //Show the answer buttons
+            hideButtons(booleanValue: false)
+            //Reset all the gameplay ints
+            questionsAsked = 0
+            correctQuestions = 0
+            //New round!
+            nextRound()
+        }
     }
     
     ///Function to check if it's the end of the game, if not then continue on
@@ -91,27 +134,13 @@ class ViewController: UIViewController {
         }
     }
     
-    ///Function to start a new game after completion of another
-    @IBAction func playAgain() {
-        // Show the answer buttons
-        hideButtons(booleanValue: false)
-        //Reset all the gameplay ints
-        questionsAsked = 0
-        correctQuestions = 0
-        //New round!
-        nextRound()
-    }
-    
-
-    
     // MARK: Helper Methods
-    
+    //Use this as the lightning round code later
     func loadNextRoundWithDelay(seconds: Int) {
         // Converts a delay in seconds to nanoseconds as signed 64 bit integer
         let delay = Int64(NSEC_PER_SEC * UInt64(seconds))
         // Calculates a time value to execute the method given current time and delay
         let dispatchTime = DispatchTime.now() + Double(delay) / Double(NSEC_PER_SEC)
-        
         // Executes the nextRound method at the dispatch time on the main queue
         DispatchQueue.main.asyncAfter(deadline: dispatchTime) {
             self.nextRound()
@@ -123,9 +152,9 @@ class ViewController: UIViewController {
     //=======================//
     
     ///Set the UI up with the correct amount of buttons based on the potential answers your question has
-    func setupUIWith(thisQuestion question: [String: String], thatHasThisManyAnswers answers: Int) {
+    func setupUIWith(thisQuestion question: Question, thatHasThisManyAnswers answers: Int) {
         //Set the questionField to contain the current question
-        questionField.text = question["question"]
+        questionField.text = question.question
         
         //convert the answers to an array of strings to make assigning them to the button title easier
         let answersArray = getAnswerStringsArray(question: question)
@@ -157,6 +186,38 @@ class ViewController: UIViewController {
         }
     }
     
+    ///Highlight or renew buttons
+    
+    func highlightAnswer(withCorrectAnswer answer: String) {
+
+        if buttonOne.titleLabel?.text != answer{
+            buttonOne.alpha = 0.3
+        }
+        if buttonTwo.titleLabel?.text != answer{
+            buttonTwo.alpha = 0.3
+        }
+        if buttonThree.titleLabel?.text != answer{
+            buttonThree.alpha = 0.3
+        }
+        if buttonFour.titleLabel?.text != answer{
+            buttonFour.alpha = 0.3
+        }
+    }
+    
+    func resetButtonHighlights() {
+        buttonOne.alpha = 1.0
+        buttonTwo.alpha = 1.0
+        buttonThree.alpha = 1.0
+        buttonFour.alpha = 1.0
+    }
+    
+    func enableDisableButtons(withBool booleanValue: Bool) {
+        buttonOne.isEnabled = booleanValue
+        buttonTwo.isEnabled = booleanValue
+        buttonThree.isEnabled = booleanValue
+        buttonFour.isEnabled = booleanValue
+    }
+    
     ///Game sound setup
     func loadGameStartSound() {
         let pathToSoundFile = Bundle.main.path(forResource: "GameSound", ofType: "wav")
@@ -176,6 +237,7 @@ class ViewController: UIViewController {
         
         // Display play again button
         playAgainButton.isHidden = false
+        playAgainButton.setTitle("Play Again", for: .normal)
         
         //Show the user their score
         questionField.text = "Way to go!\nYou got \(correctQuestions) out of \(questionsPerRound) correct!"

@@ -10,13 +10,15 @@ import GameKit
 
 ///The questions constant holds all questions, randomQuestion function delivers a random
 ///Questions and removes that question temporarily from the array
+
+
 struct QuizQuestions {
     
-    var questions: [[String : String]] = refillQuestions()
+    var questions: [Question] = refillQuestions()
     
     ///Provides a randomQuestion and also removes the question from
     ///the array to avoid duplicated Q's entering the quiz
-    mutating func randomQuestion() -> [String: String] {
+    mutating func randomQuestion() -> Question {
         
         //Generate a random number using GameKit to ensure that the
         //questions don't appear in the same order
@@ -40,18 +42,24 @@ struct QuizQuestions {
 }
 
 ///Provides a [String] of a questions potential answers for assigning to the UI
-func getAnswerStringsArray(question: [String: String]) -> [String]{
+func getAnswerStringsArray(question: Question) -> [String]{
     
-    //Empty array that will add every dictionary item that isn't the question
+    //Empty array that will be returned with the array of answers
     var arrayOfAnswers: [String] = []
     
-    //Go through every entry in the question
-    for dict in question {
-        //As long as the dictionary item isn't the question, add the value to the array
-        if dict.key != "question"{
-            arrayOfAnswers.append(dict.value)
-        }
-
+    //See how many answers you need
+    if question.wrongAnswer3 == "" {
+        //Only 3 potential answers
+        arrayOfAnswers.append(question.correctAnswer)
+        arrayOfAnswers.append(question.wrongAnswer1)
+        arrayOfAnswers.append(question.wrongAnswer2)
+    }
+    else if question.wrongAnswer3 != "" {
+        //4 potential answers
+        arrayOfAnswers.append(question.correctAnswer)
+        arrayOfAnswers.append(question.wrongAnswer1)
+        arrayOfAnswers.append(question.wrongAnswer2)
+        arrayOfAnswers.append(question.wrongAnswer3)
     }
     
     //return the array
@@ -60,19 +68,16 @@ func getAnswerStringsArray(question: [String: String]) -> [String]{
 
 ///This function will tell you how many potential answers are in a specific question
 ///deliver a single question, not the whole array.
-func howManyAnswers(inTheQuestion question:[String: String]) -> Int {
+func howManyAnswers(inTheQuestion question: Question) -> Int {
     //Initialise an Int to count the answers
     var answerCount = 0
     
     //For every item in the question, count the answer to the answerCount property unless it's of dict key 'question'
-    for dict in question {
-        if dict.key == "question"{
-            //Dictionary is a question, don't count to the value of answers
-        }
-        else{
-            //Dictionary is an answer, increase answer count
-            answerCount += 1
-        }
+    if question.wrongAnswer3 == "" {
+        answerCount = 3
+    }
+    else if question.wrongAnswer3 != "" {
+        answerCount = 4
     }
     
     //Finished, return the final count
@@ -82,11 +87,11 @@ func howManyAnswers(inTheQuestion question:[String: String]) -> Int {
 
 ///Once a game has finished, the questions will need topping up (We remove them to avoid asking one twice)
 ///which is what this function does! This way it's easy to comply with the DRY rule.
-func refillQuestions() -> [[String : String]]{
+func refillQuestions() -> [Question]{
     
     //Create a temporary array of dictionaries
-    let scopedQuestions = Questions()
+    let scopedQuestions = questions
     //return the questions
-    return scopedQuestions.getQuestions
+    return scopedQuestions
     
 }
